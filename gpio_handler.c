@@ -93,5 +93,10 @@ void GPIO_ODD_IRQHandler(void)
     // TODO Get pending interrupts
     uint32_t pending = GPIO_IntGet();
     // TODO Clear interrupt
-    GPIO_IntClear(pending);
+    if (pending & GPIO_IF_EXTI_NUM)
+    {
+        GPIO_IntClear(GPIO_IF_EXTI_NUM);
+    }
+    else
+        ;
 }
