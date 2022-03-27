@@ -55,7 +55,7 @@ void gpio_external_interrupt_init(void)
     GPIO_IntDisable(GPIO_IF_EXTI_NUM);
 
     // TODO Configure external interrupts
-    GPIO_ExtIntConfig(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, fasle, true, false);
+    GPIO_ExtIntConfig(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, ESWGPIO_EXTI_INDEX, fasle, true, false);
 }
 
 void gpio_external_interrupt_disable()
