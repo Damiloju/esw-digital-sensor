@@ -52,8 +52,10 @@ void gpio_external_interrupt_init(void)
     // TODO Configure pin
     GPIO_PinModeSet(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, gpioModeInputPullFilter, 1);
 
+    GPIO_IntDisable(GPIO_IF_EXTI_NUM);
+
     // TODO Configure external interrupts
-    GPIO_ExtIntConfig(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, 1, 1, 1);
+    GPIO_ExtIntConfig(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, fasle, true, false);
 }
 
 void gpio_external_interrupt_disable()
