@@ -87,10 +87,12 @@ int8_t configure_xyz_data(uint8_t dataRate, uint8_t range, uint8_t powerMod)
     uint8_t reg_val;
     reg_val = read_registry(MMA8653FC_REGADDR_SYSMOD);
 
-    if (reg_val & MMA8653FC_SYSMOD_MOD_STANDBY)
+    if (reg_val == MMA8653FC_SYSMOD_MOD_STANDBY)
     {
         // Set data rate.
-        reg_val = (reg_val & ~MMA8653FC_CTRL_REG1_DATA_RATE_MASK) | (dataRate << MMA8653FC_CTRL_REG1_DATA_RATE_SHIFT);
+        uint8_t reg_val_data;
+        reg_val_data = read_registry(MMA8653FC_REGADDR_CTRL_REG1);
+        reg_val_data = (reg_val_data & ~MMA8653FC_CTRL_REG1_DATA_RATE_MASK) | (dataRate << MMA8653FC_CTRL_REG1_DATA_RATE_SHIFT);
 
         //  Set dynamic range.
         uint8_t reg_val_range;
@@ -102,7 +104,7 @@ int8_t configure_xyz_data(uint8_t dataRate, uint8_t range, uint8_t powerMod)
         reg_val_power = read_registry(MMA8653FC_REGADDR_CTRL_REG2);
         reg_val_power = (reg_val_power & ~MMA8653FC_CTRL_REG2_ACTIVEPOW_MASK) | (powerMod << MMA8653FC_CTRL_REG2_ACTIVEPOW_SHIFT);
 
-        write_registry(MMA8653FC_REGADDR_CTRL_REG1, reg_val);
+        write_registry(MMA8653FC_REGADDR_CTRL_REG1, reg_val_data);
         write_registry(MMA8653FC_REGADDR_XYZ_DATA_CFG, reg_val_range);
         write_registry(MMA8653FC_REGADDR_CTRL_REG2, reg_val_power);
 
@@ -129,7 +131,7 @@ int8_t configure_interrupt(uint8_t polarity, uint8_t pinmode, uint8_t interrupt,
     uint8_t reg_val;
     reg_val = read_registry(MMA8653FC_REGADDR_SYSMOD);
 
-    if (reg_val & MMA8653FC_SYSMOD_MOD_STANDBY)
+    if (reg_val == MMA8653FC_SYSMOD_MOD_STANDBY)
     {
 
         //  Configure interrupt pin pinmode and interrupt transition direction
