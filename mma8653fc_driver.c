@@ -283,10 +283,11 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
  */
 int16_t convert_to_count(uint16_t raw_val)
 {
-    uint16_t res;
     // TODO Convert raw sensor data to ADC readout (count) value
+    int16_t count = raw_val;
+    count >>= 6;
 
-    return res;
+    return count;
 }
 
 /**
