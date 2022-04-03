@@ -85,9 +85,9 @@ int8_t configure_xyz_data(uint8_t dataRate, uint8_t range, uint8_t powerMod)
 {
     // Check if sensor is in standby mode, control registers can only be modified in standby mode.
     uint8_t reg_val;
-    reg_val = read_registry(MMA8653FC_REGADDR_CTRL_REG1);
+    reg_val = read_registry(MMA8653FC_REGADDR_SYSMOD);
 
-    if (reg_val & (MMA8653FC_CTRL_REG1_SAMODE_STANDBY << MMA8653FC_CTRL_REG1_SAMODE_SHIFT))
+    if (reg_val & MMA8653FC_SYSMOD_MOD_STANDBY)
     {
         // Set data rate.
         reg_val = (reg_val & ~MMA8653FC_CTRL_REG1_DATA_RATE_MASK) | (dataRate << MMA8653FC_CTRL_REG1_DATA_RATE_SHIFT);
@@ -127,9 +127,9 @@ int8_t configure_interrupt(uint8_t polarity, uint8_t pinmode, uint8_t interrupt,
 {
     //  Check if sensor is in standby mode, control registers can only be modified in standby mode.
     uint8_t reg_val;
-    reg_val = read_registry(MMA8653FC_REGADDR_CTRL_REG1);
+    reg_val = read_registry(MMA8653FC_REGADDR_SYSMOD);
 
-    if (reg_val & (MMA8653FC_CTRL_REG1_SAMODE_STANDBY << MMA8653FC_CTRL_REG1_SAMODE_SHIFT))
+    if (reg_val & MMA8653FC_SYSMOD_MOD_STANDBY)
     {
 
         //  Configure interrupt pin pinmode and interrupt transition direction

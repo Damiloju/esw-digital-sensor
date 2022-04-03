@@ -132,11 +132,11 @@ static void mma_data_ready_loop(void *args)
         // Status check
         if (data.status == 15) // Data is ready and no overflow has occured
         {
-            info1("Data ready 1");
+            info2("Data ready 1");
 
             if (scnt < DATA_STREAM_LENGTH)
             {
-                info1("Data ready 2");
+                info2("Data ready 2");
                 // Convert to engineering value and store values in local buffer
                 x_stream[scnt] = convert_to_count(data.out_x);
                 y_stream[scnt] = convert_to_count(data.out_y);
@@ -145,7 +145,7 @@ static void mma_data_ready_loop(void *args)
             }
             else
             {
-                info1("Data ready 3");
+                info2("Data ready 3");
                 // Signal analysis once the buffer is full
                 x_energy = calc_signal_energy(x_stream, scnt);
                 y_energy = calc_signal_energy(y_stream, scnt);
@@ -160,7 +160,7 @@ static void mma_data_ready_loop(void *args)
         }
         else
         {
-            info1("Data ready 3");
+            info2("Data ready 3");
 
             // Either overflow or data not ready
         }
