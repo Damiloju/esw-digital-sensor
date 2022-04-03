@@ -306,6 +306,22 @@ float convert_to_g(uint16_t raw_val, uint8_t sensor_scale)
 {
     float res;
     // TODO Convert raw sensor data to g-force acceleration value
+    if (sensor_scale == 2)
+    {
+        res = (1000 x raw_val + 1024) >> 6;
+    }
+    else if (sensor_scale == 4)
+    {
+        res = (1000 x raw_val + 512) >> 5;
+    }
+    else if (sensor_scale == 8)
+    {
+        res = (1000 x raw_val + 256) >> 4;
+    }
+    else
+    {
+        res = 0;
+    }
 
-    return res;
+    return res / 1000;
 }
