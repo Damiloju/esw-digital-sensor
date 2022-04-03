@@ -257,7 +257,6 @@ static void write_registry(uint8_t regAddr, uint8_t regVal)
 static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint16_t rxBufLen)
 {
     //  Configure I2C_TransferSeq_TypeDef
-    uint8_t reg;
     I2C_TransferSeq_TypeDef *ret, seq;
     uint8_t tx_buf[rxBufLen];
 
@@ -273,9 +272,8 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
 
     //  Do I2C transaction
     ret = i2c_transaction(&seq);
-    reg = ret->buf[1].data;
 
-    return reg;
+    return;
 }
 
 /**
