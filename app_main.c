@@ -158,7 +158,7 @@ static void mma_data_ready_loop(void *args)
         }
         else
         {
-            info2("Data ready 3");
+            info2("Data not ready overflow occured");
 
             // Either overflow or data not ready
         }
