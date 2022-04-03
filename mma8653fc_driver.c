@@ -267,7 +267,7 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
     seq.buf[0].data = tx_buf;
     seq.buf[0].len = rxBufLen;
 
-    seq.buf[1].data = rxBuf;
+    seq.buf[1].data = &rxBuf;
     seq.buf[1].len = rxBufLen;
     seq.flags = I2C_FLAG_WRITE_READ;
 
