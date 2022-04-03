@@ -50,12 +50,12 @@ void gpio_external_interrupt_init(void)
     CMU_ClockEnable(cmuClock_GPIO, true);
 
     // TODO Configure pin
-    GPIO_PinModeSet(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, gpioModePushPull, 1);
+    GPIO_PinModeSet(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, gpioModeInputPullFilter, 1);
 
     GPIO_IntDisable(GPIO_IF_EXTI_NUM);
 
     // TODO Configure external interrupts
-    GPIO_ExtIntConfig(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, ESWGPIO_EXTI_INDEX, false, true, false);
+    GPIO_ExtIntConfig(MMA8653FC_INT1_PORT, MMA8653FC_INT1_PIN, GPIO_EXTI_NUM, false, true, false);
 }
 
 void gpio_external_interrupt_disable()
@@ -98,6 +98,8 @@ void GPIO_ODD_IRQHandler(void)
     if (pending & GPIO_IF_EXTI_NUM)
     {
         GPIO_IntClear(GPIO_IF_EXTI_NUM);
+
+        osThreadFlagsSet(resumeThreadID, resumeThreadFlagID);
     }
     else
         ;

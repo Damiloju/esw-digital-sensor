@@ -13,7 +13,8 @@
 #include "cmsis_os2.h"
 #include "i2c_handler.h" // Include I2C SDA and SCL port and pins
 
-#define GPIO_IF_EXTI_NUM 0 // TODO Replace with actual IF number
+#define GPIO_EXTI_NUM 0x00000001UL    // GPIO external interrupt number (index)
+#define GPIO_IF_EXTI_NUM 0x00000002UL // Interrupt flag bit for external interrupt GPIO_EXTI_NUM
 #define ESWGPIO_EXTI_INDEX 1
 
 #define MMA8653FC_SDA_PORT gpioPortA
