@@ -106,10 +106,10 @@ static void mma_data_ready_loop(void *args)
     set_sensor_standby();
 
     // Configure sensor for xyz data acquisition.
-    configure_xyz_data(MMA8653FC_CTRL_REG1_DR_100HZ, MMA8653FC_XYZ_DATA_CFG_4G_RANGE, MMA8653FC_CTRL_REG2_POWMOD_NORMAL);
+    configure_xyz_data(MMA8653FC_CTRL_REG1_DR_6HZ, MMA8653FC_XYZ_DATA_CFG_2G_RANGE, MMA8653FC_CTRL_REG2_POWMOD_LOWPOW);
 
     // Configure sensor to generate interrupt when new data becomes ready.
-    configure_interrupt(MMA8653FC_CTRL_REG3_POLARITY_HIGH, MMA8653FC_CTRL_REG3_PINMODE_PP, MMA8653FC_CTRL_REG4_DRDY_INT_EN, MMA8653FC_CTRL_REG5_DRDY_INTSEL_INT1);
+    configure_interrupt(MMA8653FC_CTRL_REG3_POLARITY_LOW, MMA8653FC_CTRL_REG3_PINMODE_PP, (MMA8653FC_CTRL_REG4_DRDY_INT_EN << MMA8653FC_CTRL_REG4_DRDY_INT_SHIFT), (MMA8653FC_CTRL_REG5_DRDY_INTSEL_INT1 << MMA8653FC_CTRL_REG5_DRDY_INTSEL_SHIFT));
 
     // Configure GPIO for external interrupts and enable external interrupts.
     gpio_external_interrupt_init();
