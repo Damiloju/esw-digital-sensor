@@ -92,7 +92,7 @@ int8_t configure_xyz_data(uint8_t dataRate, uint8_t range, uint8_t powerMod)
         // Set data rate.
         reg_val = (reg_val & ~MMA8653FC_CTRL_REG1_DATA_RATE_MASK) | (dataRate << MMA8653FC_CTRL_REG1_DATA_RATE_SHIFT);
 
-        // TODO Set dynamic range.
+        //  Set dynamic range.
         uint8_t reg_val_range;
         reg_val_range = read_registry(MMA8653FC_REGADDR_XYZ_DATA_CFG);
         reg_val_range = (reg_val_range & ~MMA8653FC_XYZ_DATA_CFG_RANGE_MASK) | (range << MMA8653FC_XYZ_DATA_CFG_RANGE_SHIFT);
@@ -125,25 +125,25 @@ int8_t configure_xyz_data(uint8_t dataRate, uint8_t range, uint8_t powerMod)
  */
 int8_t configure_interrupt(uint8_t polarity, uint8_t pinmode, uint8_t interrupt, uint8_t int_select)
 {
-    // TODO Check if sensor is in standby mode, control registers can only be modified in standby mode.
+    //  Check if sensor is in standby mode, control registers can only be modified in standby mode.
     uint8_t reg_val;
     reg_val = read_registry(MMA8653FC_REGADDR_CTRL_REG1);
 
     if (reg_val & (MMA8653FC_CTRL_REG1_SAMODE_STANDBY << MMA8653FC_CTRL_REG1_SAMODE_SHIFT))
     {
 
-        // TODO Configure interrupt pin pinmode and interrupt transition direction
+        //  Configure interrupt pin pinmode and interrupt transition direction
         uint8_t reg_val_int_pin;
         reg_val_int_pin = read_registry(MMA8653FC_REGADDR_CTRL_REG3);
         reg_val_int_pin = (reg_val_int_pin & ~MMA8653FC_CTRL_REG3_POLARITY_MASK) | (polarity << MMA8653FC_CTRL_REG3_POLARITY_SHIFT);
         reg_val_int_pin = (reg_val_int_pin & ~MMA8653FC_CTRL_REG3_PINMODE_MASK) | (pinmode << MMA8653FC_CTRL_REG3_PINMODE_SHIFT);
 
-        // TODO Enable data ready interrupt
+        //  Enable data ready interrupt
         uint8_t reg_val_int_enable;
         reg_val_int_enable = read_registry(MMA8653FC_REGADDR_CTRL_REG4);
         reg_val_int_enable = (reg_val_int_enable & ~MMA8653FC_CTRL_REG4_DRDY_INT_MASK) | (interrupt << MMA8653FC_CTRL_REG4_DRDY_INT_SHIFT);
 
-        // TODO Route data ready interrupt to sensor INT1 output pin (connected to port PA1 on the TTTW uC)
+        //  Route data ready interrupt to sensor INT1 output pin (connected to port PA1 on the TTTW uC)
         uint8_t reg_val_int_route;
         reg_val_int_route = read_registry(MMA8653FC_REGADDR_CTRL_REG5);
         reg_val_int_route = (reg_val_int_route & ~MMA8653FC_CTRL_REG5_DRDY_INTSEL_MASK) | (int_select << MMA8653FC_CTRL_REG5_DRDY_INTSEL_SHIFT);
@@ -254,7 +254,7 @@ static void write_registry(uint8_t regAddr, uint8_t regVal)
  */
 static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint16_t rxBufLen)
 {
-    // TODO Configure I2C_TransferSeq_TypeDef
+    //  Configure I2C_TransferSeq_TypeDef
     uint8_t reg;
     I2C_TransferSeq_TypeDef *ret, seq;
     uint8_t tx_buf[rxBufLen];
@@ -269,7 +269,7 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
     seq.buf[1].len = rxBufLen;
     seq.flags = I2C_FLAG_WRITE_READ;
 
-    // TODO Do I2C transaction
+    //  Do I2C transaction
     ret = i2c_transaction(&seq);
     reg = ret->buf[1].data;
 

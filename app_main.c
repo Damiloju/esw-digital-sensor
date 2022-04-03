@@ -1,27 +1,27 @@
 /**
  * @file app_main.c
- * 
- * @brief   Communicates with TTTW labkit accelerometer over I2C protocol. Writes 
+ *
+ * @brief   Communicates with TTTW labkit accelerometer over I2C protocol. Writes
  *          results to log output.
  *
  * MMA8653FC datasheet
  * https://www.nxp.com/docs/en/data-sheet/MMA8653FC.pdf
- * 
+ *
  * MMA8653FC application note
  * https://www.nxp.com/docs/en/application-note/AN4083.pdf
- * 
+ *
  * EFR32 Application Note on I2C
  * https://www.silabs.com/documents/public/application-notes/AN0011.pdf
  *
  * EFR32MG12 Wireless Gecko Reference Manual (I2C p501)
  * https://www.silabs.com/documents/public/reference-manuals/efr32xg12-rm.pdf
- * 
+ *
  * EFR32MG12 Wireless Gecko datasheet
  * https://www.silabs.com/documents/public/data-sheets/efr32mg12-datasheet.pdf
  *
- * GPIO API documentation 
+ * GPIO API documentation
  * https://docs.silabs.com/mcu/latest/efr32mg12/group-GPIO
- * 
+ *
  * ARM RTOS API
  * https://arm-software.github.io/CMSIS_5/RTOS2/html/group__CMSIS__RTOS.html
  *
@@ -30,7 +30,7 @@
  *
  * Copyright Thinnect Inc. 2019
  * Copyright ProLab, TTÜ. 2021
- * 
+ *
  */
 #include <stdio.h>
 #include <stdint.h>
@@ -64,13 +64,13 @@
 #include "incbin.h"
 INCBIN(Header, "header.bin");
 
-#define DATA_READY_THREAD_FLAG      0x01
+#define DATA_READY_THREAD_FLAG 0x01
 static osThreadId_t dataReadyThreadId;
 
 float calc_signal_energy(float buf[], uint32_t num_elements);
 
 // Heartbeat loop - periodically print 'Heartbeat'
-static void hb_loop (void *args)
+static void hb_loop(void *args)
 {
     for (;;)
     {
@@ -83,17 +83,17 @@ static void hb_loop (void *args)
  * @brief   Configures I2C, GPIO and sensor, wakes up on MMA8653FC data ready interrupt, fetches
  *          a batch of sensor data and analyzes data.
  */
-static void mma_data_ready_loop (void *args)
+static void mma_data_ready_loop(void *args)
 {
-    #define DATA_STREAM_LENGTH  12
+#define DATA_STREAM_LENGTH 12
     uint8_t whoami, scnt = 0;
     xyz_rawdata_t data;
-    
+
     uint16_t x_stream[DATA_STREAM_LENGTH];
     uint16_t y_stream[DATA_STREAM_LENGTH];
     uint16_t z_stream[DATA_STREAM_LENGTH];
     float x_energy, y_energy, z_energy;
-    
+
     // Initialize and enable I2C.
     i2c_init();
     i2c_enable();
@@ -101,23 +101,25 @@ static void mma_data_ready_loop (void *args)
     // Read Who-am-I registry
     whoami = read_whoami();
     info1("WHO AM I - %u", whoami);
-    
+
     // To configure sensor put sensor in standby mode.
     set_sensor_standby();
-    
-    // TODO Configure sensor for xyz data acquisition.
-    //configure_xyz_data( , , );
-    
-    // TODO Configure sensor to generate interrupt when new data becomes ready.
-    //configure_interrupt( , , , );
-    
+
+    // Configure sensor for xyz data acquisition.
+    int8_t d = configure_xyz_data(MMA8653FC_CTRL_REG1_DR_100HZ, MMA8653FC_XYZ_DATA_CFG_4G_RANGE, MMA8653FC_CTRL_REG2_POWMOD_NORMAL);
+
+    // Configure sensor to generate interrupt when new data becomes ready.
+    int8_t d2 = configure_interrupt(MMA8653FC_CTRL_REG3_POLARITY_HIGH, MMA8653FC_CTRL_REG3_PINMODE_PP, MMA8653FC_CTRL_REG4_DRDY_INT_EN, MMA8653FC_CTRL_REG5_DRDY_INTSEL_INT1);
+
+    info2("Config returns %i,%i", d, d2);
+
     // Configure GPIO for external interrupts and enable external interrupts.
     gpio_external_interrupt_init();
     gpio_external_interrupt_enable(dataReadyThreadId, DATA_READY_THREAD_FLAG);
-    
+
     // Activate sensor.
     set_sensor_active();
-    
+
     for (;;)
     {
         // Wait for data ready interrupt signal from MMA8653FC sensor
@@ -126,13 +128,15 @@ static void mma_data_ready_loop (void *args)
 
         // Get raw data
         data = get_xyz_data();
-        
+
         // Status check
         if (data.status == 15) // Data is ready and no overflow has occured
         {
-            
-            if(scnt < DATA_STREAM_LENGTH)
+            info1("Data ready 1");
+
+            if (scnt < DATA_STREAM_LENGTH)
             {
+                info1("Data ready 2");
                 // Convert to engineering value and store values in local buffer
                 x_stream[scnt] = convert_to_count(data.out_x);
                 y_stream[scnt] = convert_to_count(data.out_y);
@@ -141,34 +145,36 @@ static void mma_data_ready_loop (void *args)
             }
             else
             {
+                info1("Data ready 3");
                 // Signal analysis once the buffer is full
                 x_energy = calc_signal_energy(x_stream, scnt);
                 y_energy = calc_signal_energy(y_stream, scnt);
                 z_energy = calc_signal_energy(z_stream, scnt);
-                
+
                 info2("Signal energy");
-                info2("x %i,%i", (int32_t)x_energy, abs((int32_t)(x_energy*1000) - (((int32_t)x_energy) * 1000)));
-                info2("y %i,%i", (int32_t)y_energy, abs((int32_t)(y_energy*1000) - (((int32_t)y_energy) * 1000)));
-                info2("z %i,%i", (int32_t)z_energy, abs((int32_t)(z_energy*1000) - (((int32_t)z_energy) * 1000)));
+                info2("x %i,%i", (int32_t)x_energy, abs((int32_t)(x_energy * 1000) - (((int32_t)x_energy) * 1000)));
+                info2("y %i,%i", (int32_t)y_energy, abs((int32_t)(y_energy * 1000) - (((int32_t)y_energy) * 1000)));
+                info2("z %i,%i", (int32_t)z_energy, abs((int32_t)(z_energy * 1000) - (((int32_t)z_energy) * 1000)));
                 scnt = 0;
             }
-             
         }
         else
         {
+            info1("Data ready 3");
+
             // Either overflow or data not ready
         }
     }
 }
 
-int logger_fwrite_boot (const char *ptr, int len)
+int logger_fwrite_boot(const char *ptr, int len)
 {
     fwrite(ptr, len, 1, stdout);
     fflush(stdout);
     return len;
 }
 
-int main ()
+int main()
 {
     PLATFORM_Init();
 
@@ -179,19 +185,19 @@ int main ()
     RETARGET_SerialInit();
     log_init(BASE_LOG_LEVEL, &logger_fwrite_boot, NULL);
 
-    info1("Digi-sensor-demo "VERSION_STR" (%d.%d.%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    info1("Digi-sensor-demo " VERSION_STR " (%d.%d.%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
     // Initialize OS kernel.
     osKernelInitialize();
 
     // Create a thread.
-    const osThreadAttr_t app_thread_attr = { .name = "heartbeat" , .priority = osPriorityNormal2 };
+    const osThreadAttr_t app_thread_attr = {.name = "heartbeat", .priority = osPriorityNormal2};
     osThreadNew(hb_loop, NULL, &app_thread_attr);
 
     // Create thread to receive data ready event and read data from sensor.
-    const osThreadAttr_t data_ready_thread_attr = { .name = "data_ready_thread" };
+    const osThreadAttr_t data_ready_thread_attr = {.name = "data_ready_thread"};
     dataReadyThreadId = osThreadNew(mma_data_ready_loop, NULL, &data_ready_thread_attr);
-    
+
     if (osKernelReady == osKernelGetState())
     {
         // Switch to a thread-safe logger
@@ -206,28 +212,29 @@ int main ()
         err1("!osKernelReady");
     }
 
-    for(;;);
+    for (;;)
+        ;
 }
 
 /**
- * @brief 
- * Calculate energy of measured signal. 
- * 
- * @details 
- * Energy is calculated by subtracting bias from every sample and then adding 
- * together the square values of all samples. Energy is small if there is no 
- * signal (just measurement noise) and larger when a signal is present. 
+ * @brief
+ * Calculate energy of measured signal.
+ *
+ * @details
+ * Energy is calculated by subtracting bias from every sample and then adding
+ * together the square values of all samples. Energy is small if there is no
+ * signal (just measurement noise) and larger when a signal is present.
  *
  * Disclaimer: The signal measured by the ADC is an elecrical signal, and its
  * unit would be joule, but since I don't know the exact load that the signal
- * is driving I can't account for the load. And so the energy I calculate here  
- * just indicates the presence or absence of a signal (and its relative 
- * strength), not the actual electrical energy in joules. 
+ * is driving I can't account for the load. And so the energy I calculate here
+ * just indicates the presence or absence of a signal (and its relative
+ * strength), not the actual electrical energy in joules.
  * Such a calculation can be done to all sorts of signals. There is probably
  * a more correct scientific term than energy for the result of this calculation
  * but I don't know what it is.
  *
- * Read about signal energy 
+ * Read about signal energy
  * https://www.gaussianwaves.com/2013/12/power-and-energy-of-a-signal/
  *
  * @return Energy value.
