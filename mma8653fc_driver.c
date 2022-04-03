@@ -83,16 +83,33 @@ uint8_t read_whoami()
  */
 int8_t configure_xyz_data(uint8_t dataRate, uint8_t range, uint8_t powerMod)
 {
-    // TODO Check if sensor is in standby mode, control registers can only be modified in standby mode.
+    // Check if sensor is in standby mode, control registers can only be modified in standby mode.
     uint8_t reg_val;
+    reg_val = read_registry(MMA8653FC_REGADDR_CTRL_REG1);
 
-    // TODO Set data rate.
+    if (reg_val & MMA8653FC_CTRL_REG1_SAMODE_MASK)
+    {
+        // Set data rate.
+        reg_val = (reg_val & ~MMA8653FC_CTRL_REG1_DATA_RATE_MASK) | (dataRate << MMA8653FC_CTRL_REG1_DATA_RATE_SHIFT);
 
-    // TODO Set dynamic range.
+        // TODO Set dynamic range.
+        uint8_t reg_val_range;
+        reg_val_range = read_registry(MMA8653FC_REGADDR_XYZ_DATA_CFG);
+        reg_val_range = (reg_val_range & ~MMA8653FC_XYZ_DATA_CFG_RANGE_MASK) | (range << MMA8653FC_XYZ_DATA_CFG_RANGE_SHIFT);
 
-    // TODO Set power mode (oversampling).
+        // Set power mode (oversampling)
+        uint8_t reg_val_power;
+        reg_val_power = read_registry(MMA8653FC_REGADDR_CTRL_REG2);
+        reg_val_power = (reg_val_power & ~MMA8653FC_CTRL_REG2_ACTIVEPOW_MASK) | (powerMod << MMA8653FC_CTRL_REG2_ACTIVEPOW_SHIFT);
 
-    return 0;
+        write_registry(MMA8653FC_REGADDR_CTRL_REG1, reg_val);
+        write_registry(MMA8653FC_REGADDR_XYZ_DATA_CFG, reg_val_range);
+        write_registry(MMA8653FC_REGADDR_CTRL_REG2, reg_val_power);
+
+        return 0;
+    }
+
+    return -1;
 }
 
 /**
@@ -218,7 +235,7 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
     // TODO Configure I2C_TransferSeq_TypeDef
     uint8_t reg;
     I2C_TransferSeq_TypeDef *ret, seq;
-    static uint8_t tx_buf[1], rx_buf[1];
+    static uint8_t tx_buf[1];
 
     // Configure I2C_TransferSeq_TypeDef
     seq.addr = MMA8653FC_SLAVE_ADDRESS_READ;
@@ -226,9 +243,8 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
     seq.buf[0].data = tx_buf;
     seq.buf[0].len = 1;
 
-    rx_buf[0] = 0;
-    seq.buf[1].data = rx_buf;
-    seq.buf[1].len = 1;
+    seq.buf[1].data = rxBuf;
+    seq.buf[1].len = rxBufLen;
     seq.flags = I2C_FLAG_WRITE_READ;
 
     // TODO Do I2C transaction
@@ -236,8 +252,6 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
     reg = ret->buf[1].data[0];
 
     return reg;
-
-    return;
 }
 
 /**
