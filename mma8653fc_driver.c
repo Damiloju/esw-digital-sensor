@@ -287,7 +287,7 @@ int16_t convert_to_count(uint16_t raw_val)
     int16_t count = raw_val;
     count >>= 6;
 
-    return count;
+    return count % 1000;
 }
 
 /**
