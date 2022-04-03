@@ -271,7 +271,7 @@ static void read_multiple_registries(uint8_t startRegAddr, uint8_t *rxBuf, uint1
 
     // TODO Do I2C transaction
     ret = i2c_transaction(&seq);
-    reg = ret->buf[1].data[0];
+    reg = ret->buf[1].data;
 
     return reg;
 }
